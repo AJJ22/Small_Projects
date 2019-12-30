@@ -1,0 +1,197 @@
+import random
+import math
+
+POP_SIZE = 500
+#ITERATIONS = 500
+
+RANDOM_PER = .05
+MUTATE_PER = .05
+CHILD_PER = .9
+
+CULL_PER = .5
+MUTAE_RANGE = .005
+
+
+A_range = [5000, 50000]
+B_range = [50, 750]
+C_range = [500, 2500]
+D_range = [1000, 10000]
+E_range = [1, 25]
+
+class Person:
+    def __init__(self, A, B, C, D, E):
+        self.A=A
+        self.B=B
+        self.C=C
+        self.D=D
+        self.E=E
+        self.score=0
+
+    def getNums(self):
+        return [self.A, self.B, self.C, self.D, self.E]
+    
+    def getScore(self):
+        return self.score
+
+    def printPerson(self):
+        print("[", "A: ", self.A, ", B: ", self.B, ", C: ", self.C, ", D: ", self.D, ", E: ", self.E, "]")
+
+
+def chooseParent(letter, M, F):
+    if random.randint(1,2) == 1:
+        if letter == "A":
+            return M.A
+        elif letter == "B":
+            return M.B
+        elif letter == "C":
+            return M.C
+        elif letter == "D":
+            return M.D
+        elif letter == "E":
+            return M.E
+    else:
+        if letter == "A":
+            return F.A
+        elif letter == "B":
+            return F.B
+        elif letter == "C":
+            return F.C
+        elif letter == "D":
+            return F.D
+        elif letter == "E":
+            return F.E
+
+def createChild(M, F):
+    a = chooseParent("A", M, F)
+    b = chooseParent("B", M, F)
+    c = chooseParent("C", M, F)
+    d = chooseParent("D", M, F)
+    e = chooseParent("E", M, F)
+
+    child = Person(a, b, c, d, e)
+    return child
+
+def mutatePerson(per):
+    a_margin = math.ceil(per.A * MUTAE_RANGE)
+    b_margin = math.ceil(per.B * MUTAE_RANGE)
+    c_margin = math.ceil(per.C * MUTAE_RANGE)
+    d_margin = math.ceil(per.D * MUTAE_RANGE)
+    e_margin = math.ceil(per.E * MUTAE_RANGE)
+
+    #print(a_margin)
+    #print(b_margin)
+    #print(c_margin)
+    #print(d_margin)
+    #print(e_margin)
+
+    a = random.randint(per.A-a_margin, per.A+a_margin)
+    b = random.randint(per.B-b_margin, per.B+b_margin)
+    c = random.randint(per.C-c_margin, per.C+c_margin)
+    d = random.randint(per.D-d_margin, per.D+d_margin)
+    e = random.randint(per.E-e_margin, per.E+e_margin)
+
+    newPer = Person(a, b, c, d, e)
+    #newPer.printPerson()
+    return newPer
+
+def randomPerson():
+    a = random.randint(A_range[0], A_range[1])
+    b = random.randint(B_range[0], B_range[1])
+    c = random.randint(C_range[0], C_range[1])
+    d = random.randint(D_range[0], D_range[1])
+    e = random.randint(E_range[0], E_range[1])
+    
+    per = Person(a, b, c, d, e)
+    return per
+
+def cull(popu):
+    #print("cull number: ",CULL_PER*POP_SIZE)
+    #print("POP_SIZE: ", len(popu))
+    #for i in range(1, int(CULL_PER*POP_SIZE)-1):
+        #popu.pop(len(popu)-1)
+    culledPop = popu[0:int((1-CULL_PER)*100)]
+    return culledPop
+
+def populateFirst(pop):
+    for i in range(1, POP_SIZE):
+        pop.append(randomPerson())
+
+def rePopulate(pop):
+    newPop = pop
+    #print("OLD POP SIZE", len(pop))
+    #print("RANDOM_PERCENT: ", int((RANDOM_PER*(POP_SIZE-int((1-CULL_PER)*POP_SIZE)))))
+    #print("MUTATE_PERCENT: ", int((MUTATE_PER*(POP_SIZE-int((1-CULL_PER)*POP_SIZE)))))
+    #print("CHILD_PERCENT: ", int((CHILD_PER*(POP_SIZE-int((1-CULL_PER)*POP_SIZE)))))
+
+    for i in range(1, int((RANDOM_PER*(POP_SIZE-int((1-CULL_PER)*POP_SIZE))))):
+        newPop.append(randomPerson())
+    for i in range(0, int((MUTATE_PER*(POP_SIZE-int((1-CULL_PER)*POP_SIZE))))):
+        newPop.append(mutatePerson(pop[random.randint(1, len(pop)-1)]))
+    for i in range(1, int((CHILD_PER*(POP_SIZE-int((1-CULL_PER)*POP_SIZE))))):
+        newPop.append(createChild(pop[random.randint(1, len(pop)-1)], pop[random.randint(1, len(pop)-1)]))
+    #print("NEW POP SIZE", len(newPop))
+    return newPop
+
+def comparePeople(p1, target):
+    a_dis = abs(p1.A - target.A)
+    b_dis = abs(p1.B - target.B)
+    c_dis = abs(p1.C - target.C)
+    d_dis = abs(p1.D - target.D)
+    e_dis = abs(p1.E - target.E)
+
+    return a_dis + b_dis + c_dis + d_dis + e_dis 
+    ###ADD SOMEHING TO FIND VALUE < 10 OR < 5 OR SOMETHING LIKE THAT
+    #run until we find score <10 or <5
+
+def fitness(pop):
+    ranking = {}
+    newRanking = {}
+    finalRanking = []
+
+    low = 1000
+    lowPerson = Person(1,1,1,1,1)
+
+    for person in pop:
+        personScore = comparePeople(person, targetPerson)
+        ranking[personScore] = person
+        if personScore < 10:
+            low = personScore
+            lowPerson = person
+
+    for i in sorted(ranking):
+        newRanking[i] = ranking[i]
+    print()
+    print("NEW RANKING: ", newRanking.keys())
+    print()
+    for i in newRanking:
+        finalRanking.append(newRanking.get(i))
+
+    return [finalRanking, low, lowPerson]
+
+
+
+targetPerson = Person(24325, 622, 784, 6098, 3)
+population = []
+iter = 0
+
+
+#populate
+populateFirst(population)
+#fitness
+[population, low, lowPerson] = fitness(population)
+#cull
+population = cull(population)
+while low > 10:
+    iter+=1
+    #print("ITERATIONS: ", iter)
+    #repopulate
+    poopulation = rePopulate(population)
+    #fitness
+    [population, low, lowPerson] = fitness(population)
+    #cull
+    population = cull(population)
+
+print("BEST SCORE: ", low)
+print("LOW Person:", lowPerson.printPerson())
+print("TARGET Person: ", targetPerson.printPerson())
+print("TOTAL ITERATIONS: ", iter)
