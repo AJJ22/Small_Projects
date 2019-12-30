@@ -1,0 +1,73 @@
+from AI_1 import AITurn, AI_1
+from TicTacToe import move, drawBoard
+
+
+def playGame(n, AI, AIvAI):
+    moves = 0
+    board = [[" " for j in range(n)] for k in range(n)]
+    state = "x"
+    AI1 = AI[0]
+    
+
+    while moves <= 9:
+        drawBoard(board)
+        print("Current state:", state)
+
+        if AIvAI == True:
+            AI2 = AI[1]
+            if state == AI1.state:
+                [y, x] = AITurn(board, AI1, n)
+                #print("[",y,",",x,"]")
+                [moveReturn, board] = move(x, y, state, board, n)
+            elif state == AI2.state:
+                [y, x] = AITurn(board, AI2, n)
+                #print("[",y,",",x,"]")
+                [moveReturn, board] = move(x, y, state, board, n)
+        else:
+            if state == AI1.state:
+                [y, x] = AITurn(board, AI1, n)
+                #print("[",y,",",x,"]")
+                [moveReturn, board] = move(x, y, state, board, n)
+            else:
+                y = int(input ("Please enter X coord: "))
+                x = int(input ("Please enter y coord: "))
+                [moveReturn, board] = move(x, y, state, board, n)
+        
+        moves += 1
+
+        if moveReturn == "x" or moveReturn == "o":
+            print("Congrats", moveReturn, "you win!")
+            break
+
+        if moves == n*n:
+            print("Tie!")
+            break
+    
+        if state == "x":
+            state="o"
+        elif state == "o":
+            state = "x"
+
+    drawBoard(board)
+
+
+
+def runGameSet(n, times, AI, AIvAI):
+    for i in range(times):
+        if i >= 0:
+            print("===================")
+            print("Here is round", i+1, "!")
+            print("===================")
+        playGame(n, AI, AIvAI)
+
+
+
+
+#######SETUP GAME SETTINGS HERE#######
+### ARG 4: True if you want to watch 2 AI play against eachother, False if you want to play against an AI
+### ARG 3: Pass in 1 or 2 AI depending on how you want to play
+### ARG 2: Number of games to play
+### ARG 1: Board size, can be anything from 2-infinity (dosen't work yet, have to make modifications. KEEP AT 3)
+AI1 = AI_1("x")
+AI2 = AI_1("o")
+runGameSet(3, 2, [AI2], False)
