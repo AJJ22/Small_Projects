@@ -1,0 +1,126 @@
+####TODO####
+#let player re-do turn if they pick an already taken space
+#make tie happen when all spaces are used, not after (n*n) moves
+#check for wins based on n, not hardcoded indexes
+
+class AI_1:
+    def __init__(self, state):
+        self.state = state
+
+    #check for wins
+    #win for AI =  10
+    #    player = -10
+    #    no win =  0
+    def evaluate(self, b, n, oponentState):
+        state = self.state
+
+        #column
+        for i in range(n):
+            if b[i][0] == b[i][1] and b[i][1] == b[i][2]:
+                if b[i][0] == state:
+                    return 10
+                elif b[i][0] == oponentState:
+                    return -10
+
+        #row
+        for i in range(n):
+            if b[0][i] == b[1][i] and b[1][i] == b[2][i]:
+                if b[0][i] == state:
+                    return 10
+                elif b[0][i] == oponentState:
+                    return -10
+
+        #diagonal
+        if b[0][0] == b[1][1] and b[1][1] == b[2][2]:
+            if b[0][0] == state:
+                return 10
+            elif b[0][0] == oponentState:
+                return -10
+
+        #reverse diagonal
+        if b[0][2] == b[1][1] and b[1][1] == b[2][0]:
+            if b[0][2] == state:
+                return 10
+            elif b[0][2] == oponentState:
+                return -10
+        
+        #no one wins yet
+        return 0
+
+    def movesLeft(self, board):
+        for row in board:
+            for cell in row:
+                if cell == " ":
+                    return True
+        return False
+
+    def minimax(self, n, board, depth, isMax):
+        #print()
+        #for row in board:
+        #    print(row)
+
+        oponentState = ""
+        if self.state == "x":
+            oponentState = "o"
+        elif self.state == "o":
+            oponentState = "x"
+        
+        score = self.evaluate(board, n, oponentState)
+        #print("Score:", score)
+        
+        if score==10:
+            #print("10 RETURN")
+            return score
+        if score==-10:
+            #print("-10 RETURN")
+            return score
+        if self.movesLeft(board) == False:
+            #print("movesLeft RETURN")
+            return 0
+        
+        #print("ISmax:", isMax)
+
+        if(isMax):
+            best = -1000
+            for i in range(n):
+                for j in range(n):
+                    if board[i][j] == " ":
+                        #print("depth:", depth)
+                        board[i][j] = self.state
+                        best = max(best, self.minimax(n, board, depth+1, not(isMax)))
+                        board[i][j] = " "
+            #print("maxBEST:",best)
+            return best
+        else:
+            best = 1000
+            for i in range(n):
+                for j in range(n):
+                    if board[i][j] == " ":
+                        board[i][j] = oponentState
+                        best = min(best, self.minimax(n, board, depth+1, not(isMax)))
+                        board[i][j] = " "
+            return best
+
+    def findBestMove(self, n, board):
+        bestVal = -1000
+        bestX = -1
+        bestY = -1
+
+        for i in range(n):
+            for j in range(n):
+                if(board[i][j] == " "):
+                    board[i][j] = self.state
+                    moveVal = self.minimax(n, board, 0, False)
+                    board[i][j] = " "
+
+                    if moveVal > bestVal:
+                        bestVal = moveVal
+                        bestX = j
+                        bestY = i
+        #print("BESTvalue:", bestVal)
+        #print("BestMOVE: [",bestX,",",bestY,"]")
+        return [bestX, bestY]
+
+def AITurn(board, AI, n):
+    [x, y] = AI.findBestMove(n, board)
+    return [x, y]
