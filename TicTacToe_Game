@@ -1,0 +1,46 @@
+def move(x, y, state, board, n):
+    print()
+
+    try:
+        if board[x][y] == " ":
+            board[x][y] = state
+        else:
+            print("Someone already chose that space")
+
+        #check all the pieces to find win
+        #column
+        for i in range(0, n):
+            if board[i][y] != state:
+                break
+            if i == n-1:
+                return [state, board]
+
+        #row
+        for i in range(0, n):
+            if board[x][i] != state:
+                break
+            if i == n-1:
+                return [state, board]
+
+        #diagonal
+        for i in range(0, n):
+            if board[i][i] != state:
+                break
+            if i == n-1:
+                return [state, board]
+
+        #reverse diagonal
+        for i in range(0, n):
+            if board[i][n-(i+1)] != state:
+                break
+            if i == n-1:
+                return [state, board]
+
+    except:
+        print("Error, please try again")
+
+    return [" ", board]
+
+def drawBoard(board):
+    for row in board:
+        print(row)
